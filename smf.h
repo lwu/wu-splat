@@ -40,7 +40,7 @@ typedef std::vector<Vert>::iterator VertIt;
 template <typename T>
 T get_interleaved(VertIt begin, VertIt end)
 {
-	return T(begin, end);
+	return T(&*begin, &*end);
 }
 
 class TriMesh

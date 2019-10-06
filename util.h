@@ -2,7 +2,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-double get_cpu_time();
+#include <gfx/gfx.h> // for get_cpu_time()
 
 // Timer helper class
 class Timer {

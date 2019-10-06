@@ -15,6 +15,7 @@
 
 static TriMesh *current_mesh = NULL;
 
+/*
 static int script_v(const char *op, char *argline, Scripting *)
 {
     Vec3f v;
@@ -23,7 +24,9 @@ static int script_v(const char *op, char *argline, Scripting *)
     current_mesh->vertex.push_back(v);
     return SCRIPT_OK;
 }
+*/
 
+/*
 static int script_f(const char *op, char *argline, Scripting *)
 {
     Face f;
@@ -45,7 +48,9 @@ static int script_f(const char *op, char *argline, Scripting *)
     
     return SCRIPT_OK;
 }
+*/
 
+ /*
 static script_defn handlers[] =
 {
     {"v", script_v},
@@ -62,9 +67,12 @@ void read_smf_object(TriMesh& tm, const char *filename)
     
     current_mesh = NULL;    
 }
+ */
 
-#include <iostream.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
+
+using namespace std;
 
 // This is typically 3-4x faster since it only
 //  reads vertices/faces and avoids script parsing overhead

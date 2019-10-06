@@ -1,5 +1,5 @@
 #include <gfx/gl.h>
-#include <GL/glut.h>
+#include <GLUT/glut.h>
 #include <iostream>
 #include <float.h>
 #include <assert.h>
@@ -561,7 +561,7 @@ struct sum_covariance {
 	void operator()(const Vec3f& v) {
 		Vec3f df = v - mean;
 		Vec3 d(df);
-		CV += outer_product(d,d);
+		CV += gfx::Mat3::outer_product(d,d);
 	}
 	
 	operator Mat3() {
@@ -595,7 +595,7 @@ VertTree* WSplat::build_tree(VertIt begin, VertIt end)
 		return tree;
 	}
 
-	VertexArray verts(begin, end);
+	VertexArray verts(&*begin, &*end);
 
 	Vec3f avg;
 	vector<Vert>::iterator pos;
@@ -712,7 +712,7 @@ VertTree* WSplat::build_tree(VertIt begin, VertIt end)
 	tree->node.abnormal = normal;
 #endif
 
-	assert (!_isnan(normal[0]));
+	assert (!isnan(normal[0]));
 
 	// store normal cone dot product 
 	float dot_left;
@@ -734,7 +734,7 @@ VertTree* WSplat::build_tree(VertIt begin, VertIt end)
 	
 	tree->node.cone_dot = min(dot_left, dot_right);
 
-	assert (!_isnan(tree->node.cone_dot));
+	assert (!isnan(tree->node.cone_dot));
 
 	VertTree* larger = dist_right > dist_left ? right : left;
 	float max_dist = sqrt( max(dist_right, dist_left) );

@@ -79,7 +79,7 @@ public:
 	}
 
 	size_t size() {
-		return distance(array_begin, array_end);
+		return std::distance(array_begin, array_end);
 	}
 private:
 	S* array_begin;

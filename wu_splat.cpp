@@ -5,6 +5,7 @@
 #include <gfx/gui.h>
 #include <gfx/raster.h>
 #include <gfx/mat4.h>
+#include <gfx/gfx.h>
 #include <FL/FL_ask.H>
 #include <FL/FL_file_chooser.H>
 #include <FL/FL_Value_Slider.H>
@@ -638,50 +639,53 @@ static void cb_reset_cam(Fl_Menu_*, void *)
 	redraw();
 }
 
-static void cb_exit(Fl_Menu_ *, void *) // copied from gui.cxx:120
-	{ MxGUI::current->cleanup_for_exit(); exit(0); }
-
-static void cb_snapshot(Fl_Menu_ *m, int format) // copied from gui.cxx:141
-{
-    MxGUI::current->canvas->redraw();		// don't want to snap menu
-    MxGUI::current->snapshot_to_file(format);	// snapshot what's drawn
-}
-
-static void cb_display_size(Fl_Menu_ *m, int xw) // copied from gui.cxx:147
-{
-    if( MxGUI::current->toplevel->resizable() )
-    {
-	int yw = (3*xw)/4;
-	MxGUI::current->resize_canvas(xw, yw);
-    }
-}
-
-static void cb_animate(Fl_Menu_ *m, void *) // copied from gui.cxx:123
-    { MxGUI::current->animate(m->mvalue()->value()!=0); }
-
 float get_input(const char* prompt, float orig)
 {
-	MxGUI *gui = MxGUI::current;
+    MxGUI *gui = MxGUI::current;
 
     // Convert default to a string
     static char def[64]; sprintf(def, "%.1f", orig);
 
     const char *result = fl_input(prompt, def);
-	float rv = 1.0f;
+    float rv = 1.0f;
     if( result ) {
-		rv = atof(result);
+	rv = atof(result);
     }
 
-	return rv;
+    return rv;
 }
 
-static void cb_fps(Fl_Menu_ *m, void *) // copied from gui.cxx:126
-{
-    MxGUI *gui = MxGUI::current;
+class App {
+public:
+    static void cb_exit(Fl_Menu_ *, void *) // copied from gui.cxx:120
+	{ MxGUI::current->cleanup_for_exit(); exit(0); }
+
+    static void cb_snapshot(Fl_Menu_ *m, int format) // copied from gui.cxx:141
+    {
+	MxGUI::current->canvas->redraw();		// don't want to snap menu
+	MxGUI::current->snapshot_to_file(format);	// snapshot what's drawn
+    }
+
+    static void cb_display_size(Fl_Menu_ *m, int xw) // copied from gui.cxx:147
+    {
+	if( MxGUI::current->toplevel->resizable() )
+	{
+	    int yw = (3*xw)/4;
+	    MxGUI::current->resize_canvas(xw, yw);
+	}
+    }
+
+    static void cb_animate(Fl_Menu_ *m, void *) // copied from gui.cxx:123
+    { MxGUI::current->animate(m->mvalue()->value()!=0); }
+
+    static void cb_fps(Fl_Menu_ *m, void *) // copied from gui.cxx:126
+    {
+	MxGUI *gui = MxGUI::current;
 	float fps = get_input("Number of frames per second to draw", gui->default_fps);
 	if( gui->target_fps>0 ) gui->target_fps=fps;
-}
-
+    }
+};
+    
 static void cb_silhouette(Fl_Menu_ *m, void *)
 {
 	float thresh = get_input("Silhouette edge threshold [0.0, 1.0f]", gui.splatter.silhouette_edge_thresh);
@@ -732,34 +736,34 @@ void GUI::init(int argc, char* argv[])
 		{"L&oad", FL_CTRL + 'o', (Fl_Callback *)cb_load, NULL, FL_MENU_DIVIDER},
         MXGUI_BEGIN_MENU("Sna&pshot to")
 #if defined(HAVE_LIBPNG)
-        {"&PNG", FL_CTRL+'p', (Fl_Callback *)cb_snapshot, (void *)IMG_PNG},
+	{"&PNG", FL_CTRL+'p', (Fl_Callback *)App::cb_snapshot, (void *)IMG_PNG},
 #else
         {"&PNG", FL_CTRL+'p', NULL, NULL, FL_MENU_INACTIVE },
 #endif
 #if defined(HAVE_LIBTIFF)
-        {"&TIFF", FL_CTRL+'P', (Fl_Callback *)cb_snapshot, (void *)IMG_TIFF},
+	{"&TIFF", FL_CTRL+'P', (Fl_Callback *)App::cb_snapshot, (void *)IMG_TIFF},
 #else
         {"&TIFF", FL_CTRL+'P', NULL, NULL, FL_MENU_INACTIVE},
 #endif
-        {"PP&M", 0, (Fl_Callback *)cb_snapshot, (void *)IMG_PNM},
+	{"PP&M", 0, (Fl_Callback *)App::cb_snapshot, (void *)IMG_PNM},
 #if defined(HAVE_LIBJPEG)
-        {"&JPEG", 0, (Fl_Callback *)cb_snapshot, (void *)IMG_JPEG},
+	{"&JPEG", 0, (Fl_Callback *)App::cb_snapshot, (void *)IMG_JPEG},
 #else
         {"&JPEG", 0, NULL, NULL, FL_MENU_INACTIVE},
 #endif
         MXGUI_END_MENU
-		{"E&xit", FL_CTRL + 'q',  (Fl_Callback *)cb_exit, NULL},
+		{"E&xit", FL_CTRL + 'q',  (Fl_Callback *)App::cb_exit, NULL},
 		MXGUI_END_MENU
 		
 		MXGUI_BEGIN_MENU("&View")
-		{"&Animate", FL_CTRL+'a', (Fl_Callback *)cb_animate, NULL, FL_MENU_TOGGLE},
-		{"Animation speed ...", FL_CTRL+'r', (Fl_Callback *)cb_fps, NULL},		
+		{"&Animate", FL_CTRL+'a', (Fl_Callback *)App::cb_animate, NULL, FL_MENU_TOGGLE},
+		{"Animation speed ...", FL_CTRL+'r', (Fl_Callback *)App::cb_fps, NULL},		
 		
 		MXGUI_BEGIN_MENU("Display &size")
-		{"&320x240", 0, (Fl_Callback *)cb_display_size, (void*)320},
-		{"&640x480", 0, (Fl_Callback *)cb_display_size, (void*)640},
-		{"&800x600", 0, (Fl_Callback *)cb_display_size, (void*)800},
-		{"&1024x768", 0, (Fl_Callback *)cb_display_size, (void*)1024},
+		{"&320x240", 0, (Fl_Callback *)App::cb_display_size, (void*)320},
+		{"&640x480", 0, (Fl_Callback *)App::cb_display_size, (void*)640},
+		{"&800x600", 0, (Fl_Callback *)App::cb_display_size, (void*)800},
+		{"&1024x768", 0, (Fl_Callback *)App::cb_display_size, (void*)1024},
 		MXGUI_END_MENU
 		MXGUI_END_MENU
 
